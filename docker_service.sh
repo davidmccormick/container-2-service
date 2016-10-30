@@ -20,13 +20,16 @@ Requires=docker.service
 After=docker.service
 
 [Service]
+Type=simple
 Restart=always
-ExecStart=/usr/bin/docker run -d --name ${SERVICENAME} $*
-ExecStop=/usr/bin/docker stop -t 2 ${SERVICENAME}
-ExecStopPost=/usr/bin/docker rm -f ${SERVICENAME}
+TimeoutStartSec=300
+ExecStartPre=-/usr/bin/docker stop ${SERVICENAME}
+ExecStartPre=-/usr/bin/docker rm ${SERVICENAME}
+ExecStart=/usr/bin/docker run --rm --net="host" --name ${SERVICENAME} $*
+ExecStop=-/usr/bin/docker stop -t 2 ${SERVICENAME}
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 EOT
 
 systemctl daemon-reload
